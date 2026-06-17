@@ -355,6 +355,11 @@ const BRANCHES = [
             body: "<p>Lots of back-and-forth with the customer, with walkthrough checkpoints at each intermediary step (architecture diagram, parameters). [[VIMEO]]</p>"
           },
           {
+            t: "3 &middot; Target-state walkthrough &amp; validation",
+            lead: "The intermediary checkpoint: walk the customer through the target-state design and validate it before any specs are written.",
+            body: "<p>Between target-state generation and the implementation specs, the FDE runs the &ldquo;intermediary steps&rdquo; &mdash; walkthrough checkpoints with the customer and SMEs, reviewing the architecture diagram, parameters, and the modernized design, and validating it against the business understanding. The session describes step two as &ldquo;a lot of to-and-back-and-forth with the customer,&rdquo; resolved at these checkpoints before moving to step four. [[VIMEO]]</p>"
+          },
+          {
             t: "4 &middot; Implementation-specs generation",
             lead: "From the target state, a spec that reads as a statement of work &mdash; agreed with the client.",
             body: "<p>The implementation spec is the agreed plan for how the whole modernized build will go. [[VIMEO]]</p>"

@@ -23,6 +23,10 @@ const SOURCES = {
   // --- decomposition ---
   ATL:       { t: "Atlassian — Epics, stories, and initiatives", url: "https://www.atlassian.com/agile/project-management/epics-stories-themes", d: "2026" },
   PLANE:     { t: "Plane — Epic vs. feature vs. user story vs. task", url: "https://plane.so/blog/epic-vs-feature-vs-user-story-vs-task-understanding-the-differences", d: "2026" },
+  // --- spec-driven development ---
+  SDD_BCMS:  { t: "BCMS — Spec-Driven Development (SDD): The Definitive 2026 Guide", url: "https://thebcms.com/blog/spec-driven-development", d: "2026-05-11" },
+  SPECKIT:   { t: "GitHub — Spec-Driven Development with AI: get started with GitHub Spec Kit (open-source toolkit)", url: "https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/", d: "2025" },
+  KIRO:      { t: "AWS Kiro — agentic IDE with a native spec-driven workflow (Requirements / Design / Tasks)", url: "https://kiro.dev/", d: "2025" },
   // --- platforms: ReDuX / Karsun ---
   AWSPS:     { t: "AWS Public Sector Blog — Karsun builds modernization platform on Amazon Bedrock", url: "https://aws.amazon.com/blogs/publicsector/karsun-solutions-builds-modernization-platform-using-amazon-bedrock/", d: "2024-03-19" },
   AWSMP:     { t: "AWS Marketplace — Karsun ReDuX (SaaS listing)", url: "https://aws.amazon.com/marketplace/pp/prodview-ewysxj3be4vra", d: "2025-07-30" },
@@ -271,6 +275,33 @@ const BRANCHES = [
         lead: "Legacy is hard to maintain, expensive to run, and hard to extend. You replace it while making sure the business <em>gains</em>, never loses.",
         body: "<p>Companies modernize because legacy systems are &ldquo;hard to maintain, expensive to run&rdquo; (dependencies + size) and costly to customize on top. The job is to stand up new software that covers everything the old one did &mdash; <strong>&ldquo;keep the business value and remove the risk.&rdquo;</strong> It should be a gain, not a like-for-like swap. [[VIMEO]]</p><p>And it's never big-bang: modernization runs <strong>in phases</strong> over six months to multiple years, proven out with POCs on the most critical one or two modules first. [[VIMEO]]</p>",
         video: "vimeoSession1"
+      },
+      {
+        t: "Spec-Driven Development (SDD)",
+        lead: "The spine of the whole method: a versioned <em>spec</em> &mdash; not the code &mdash; is the source of truth. Write the spec, derive the plan, break it into tasks, then generate code. The Galent session runs exactly this loop.",
+        body: "<p><strong>Spec-driven development</strong> is the methodology where an executable, version-controlled <em>specification</em> &mdash; not the code &mdash; is the single source of truth: you describe <em>what</em> the system should do, derive a plan, break it into atomic tasks, and only then generate code. When requirements change, you edit the spec and regenerate. [[SDD_BCMS]]</p><blockquote>&ldquo;The spec is the prompt.&rdquo; &mdash; the phrase that keeps recurring across 2025&ndash;26 GitHub and AWS posts. [[SDD_BCMS]]</blockquote><p>This is precisely the Galent FDE flow: analysis &rarr; a validated <strong>specification document</strong> (it goes to the client as the proposal) &rarr; epics &amp; stories &rarr; sub-tasks &rarr; implementation. The spec is the contract the agent builds against &mdash; the same discipline the cohort practises on every Plan Day. [[VIMEO]]</p>",
+        deeper: [
+          {
+            t: "Why SDD exists &mdash; the vibe-coding correction",
+            lead: "SDD emerged in 2025 as the answer to AI agents that produce plausible code which drifts from intent.",
+            body: "<p>&ldquo;Vibe coding&rdquo; (term popularized by Andrej Karpathy, early 2025) is prompting an agent and accepting whatever it produces &mdash; fast for prototypes, miserable at scale: the code drifts from intent, hallucinates APIs, and decays as the project grows. A precise spec is the missing layer between human intent and machine execution. [[SDD_BCMS]] It is the FDE's antidote to <em>both</em> shelfware and vibe-coding drift. [[SDD_BCMS]][[VIMEO]]</p>"
+          },
+          {
+            t: "The SDD loop",
+            lead: "Spec &rarr; Plan &rarr; Tasks &rarr; Code &rarr; verify against the spec. The spec stays alive.",
+            body: "<p>You capture intent, behaviour, edge cases, and acceptance criteria in a structured form a model can act on, then an agent reads it, plans, breaks it into tasks, writes code, and verifies against the original criteria. [[SDD_BCMS]] Tool workflows make this concrete: <strong>GitHub Spec Kit</strong> runs <code>/specify &rarr; /plan &rarr; /tasks &rarr; /implement</code>; <strong>AWS Kiro</strong> guides Requirements &rarr; Design &rarr; Tasks before any code is generated. [[SPECKIT]][[KIRO]]</p>"
+          },
+          {
+            t: "It's gone mainstream (2026)",
+            lead: "By 2026 every major AI coding tool ships an SDD flavour.",
+            body: "<p>GitHub Spec Kit (open-source, supports Claude Code, Copilot, Gemini CLI), AWS Kiro (agentic IDE on Claude Sonnet 4.5), Cursor, OpenSpec, BMAD, Tessl, Google Antigravity &mdash; each shipped its own SDD flavour, and DeepLearning.AI launched a dedicated &ldquo;Spec-Driven Development with Coding Agents&rdquo; course in late 2025. GitHub reports teams on Spec Kit ship with roughly an order-of-magnitude fewer &ldquo;regenerate from scratch&rdquo; cycles. [[SDD_BCMS]][[SPECKIT]]</p>"
+          }
+        ],
+        views: [
+          { r: "Business Analyst", t: "The spec is your surface: you validate intent + acceptance criteria before code exists &mdash; the cheapest place to catch the wrong build. [[VIMEO]]" },
+          { r: "Engineer / FDE", t: "You build against the spec, not vibes. The spec is the guardrail that keeps the agent's output from drifting from intent. [[SDD_BCMS]]" },
+          { r: "Why it's the FDE discipline", t: "Intent captured up front, regenerable, auditable &mdash; exactly the co-pilot-not-autopilot stance, and what every Plan-Day §0 retro re-checks. [[SDD_BCMS]][[VIMEO]]" }
+        ]
       },
       {
         t: "The FDE's 4-step method",

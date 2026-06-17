@@ -126,8 +126,8 @@
         const ring = el('circle',{class:'ring', r:nodeR(node)+5}); ring.style.stroke=node.color;
         const c = el('circle',{class:'dot', r:nodeR(node)}); c.style.fill=node.color;
         const hit = el('circle',{class:'hit', r:nodeR(node)+14});
-        const label = el('text',{class:'lbl', y: labelDY(node)});
-        label.textContent = truncate(decode(node.t), node.kind==='root'?20:22);
+        const label = el('text',{class:'lbl'});
+        setLabel(label, node);
         const tip = el('title'); tip.textContent = decode(node.t); g.appendChild(tip);
         g.appendChild(ring); g.appendChild(c); g.appendChild(hit); g.appendChild(label);
         // notes / perspective badge — open this node's detail at its own level
@@ -158,6 +158,23 @@
   function nodeR(n){ return n.kind==='root'?34 : n.depth===1?14 : n.depth===2?9.5 : 7; }
   function labelDY(n){ return n.kind==='root'?5 : nodeR(n)+15; }
   function truncate(s,m){ return s.length>m ? s.slice(0,m-1).trim()+'…' : s; }
+  // full title, word-wrapped into centered tspans (no truncation)
+  function setLabel(label, node){
+    while(label.firstChild) label.removeChild(label.firstChild);
+    const max = node.kind==='root' ? 16 : 18;
+    const words = decode(node.t).split(/\s+/);
+    const lines=[]; let line='';
+    words.forEach(function(w){
+      if(line && (line+' '+w).length>max){ lines.push(line); line=w; }
+      else line = line ? line+' '+w : w;
+    });
+    if(line) lines.push(line);
+    const y0 = labelDY(node);
+    lines.forEach(function(ln,i){
+      const ts = el('tspan', i===0 ? {x:0, y:y0} : {x:0, dy:'1.15em'});
+      ts.textContent = ln; label.appendChild(ts);
+    });
+  }
 
   /* ---------- animation loop ---------- */
   function animate(){ if(!raf) raf = requestAnimationFrame(frame); }

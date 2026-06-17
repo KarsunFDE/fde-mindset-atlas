@@ -65,7 +65,8 @@
   /* ---------- state ---------- */
   const expanded = new Set([ROOT]);
   let focus = ROOT;
-  const RAD = [0, 300, 230, 185, 160, 150, 145];
+  const RAD = [0, 300, 250, 215, 190, 175, 165]; // base ring radius at each depth
+  const SEP = [0, 320, 195, 145, 118, 102, 95];  // min px between siblings at each depth (drives radius)
   let pos = {};                 // target world coords
   const cur = {};               // animated world coords
   let view = { x:0, y:0, k:1 }; // scene transform
@@ -79,23 +80,29 @@
   function relayout(){
     const rc = rect(); STRETCH = clamp(rc.width / Math.max(rc.height,1), 0.82, 1.55);
     pos = {};
-    walk(ROOT, -Math.PI/2, {x:0,y:0}, 0, Math.PI*2);
+    place(ROOT, -Math.PI/2, {x:0,y:0}, 0, 0);
   }
-  function walk(id, dir, ppos, depth, wedge){
-    const rr = depth===0 ? 0 : RAD[Math.min(depth, RAD.length-1)];
-    const p = depth===0 ? {x:0,y:0} : { x: ppos.x + Math.cos(dir)*rr*STRETCH, y: ppos.y + Math.sin(dir)*rr };
+  // place a node at ppos + polar(dir, radius); then fan its children with breathing room
+  function place(id, dir, ppos, depth, radius){
+    const p = depth===0 ? {x:0,y:0} : { x: ppos.x + Math.cos(dir)*radius*STRETCH, y: ppos.y + Math.sin(dir)*radius };
     pos[id] = p;
-    if(id in cur === false) cur[id] = depth===0 ? {x:0,y:0} : {x:ppos.x, y:ppos.y}; // spawn from parent
+    if(!(id in cur)) cur[id] = depth===0 ? {x:0,y:0} : {x:ppos.x, y:ppos.y}; // spawn from parent
     if(!expanded.has(id)) return;
-    const kids = N[id].children; if(!kids.length) return;
-    let aStart, aSpan;
+    const kids = N[id].children, k = kids.length; if(!k) return;
+    const cd = depth+1;
+    // fan width: grows with child count, capped (wider near the root, tighter deep down)
+    let aSpan, aStart;
     if(depth===0){ aSpan = Math.PI*2; aStart = -Math.PI/2; }
-    else { aSpan = Math.min(wedge*0.92, kids.length>1 ? Math.PI*0.95 : Math.PI*0.4); aStart = dir - aSpan/2; }
-    kids.forEach(function(k,i){
-      let ca;
-      if(depth===0) ca = aStart + (i+0.5)/kids.length*aSpan;
-      else ca = kids.length===1 ? dir : aStart + (i/(kids.length-1))*aSpan;
-      walk(k, ca, p, depth+1, Math.max(aSpan/Math.max(kids.length,1), 0.55));
+    else { const maxFan = depth===1 ? Math.PI*0.95 : Math.PI*0.7; aSpan = Math.min(0.5 + k*0.30, maxFan); aStart = dir - aSpan/2; }
+    // child radius: push children out far enough that the arc spacing >= SEP[cd]
+    const baseR = RAD[Math.min(cd, RAD.length-1)];
+    const denom = depth===0 ? k : Math.max(k-1, 1);
+    const step  = aSpan/denom;
+    const childR = clamp((SEP[Math.min(cd, SEP.length-1)] || baseR)/Math.max(step,0.0001), baseR, baseR*2.7);
+    kids.forEach(function(kid,i){
+      const ca = depth===0 ? aStart + (i+0.5)/k*aSpan
+                           : (k===1 ? dir : aStart + (i/(k-1))*aSpan);
+      place(kid, ca, p, cd, childR);
     });
   }
 
@@ -201,7 +208,19 @@
   }
 
   /* ---------- expand / collapse ---------- */
-  function expand(id, andFocus){ if(!N[id].children.length) return; expanded.add(id); sync(); if(andFocus!==false) frameNode(id); }
+  function expand(id, andFocus){ if(!N[id].children.length) return; expanded.add(id); sync(); if(andFocus!==false) frameSubtree(id); }
+  // frame a node together with its now-visible children/grandchildren, with padding
+  function frameSubtree(id){
+    const r=rect(); const ids=[id];
+    if(expanded.has(id)) N[id].children.forEach(function(c){ ids.push(c); if(expanded.has(c)) N[c].children.forEach(function(g){ ids.push(g); }); });
+    let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+    ids.forEach(function(i){ const p=pos[i]; if(!p) return; minx=Math.min(minx,p.x);miny=Math.min(miny,p.y);maxx=Math.max(maxx,p.x);maxy=Math.max(maxy,p.y); });
+    if(minx>maxx){ return frameNode(id); }
+    const pad=110; const w=Math.max(maxx-minx,200)+pad*2, h=Math.max(maxy-miny,200)+pad*2;
+    const k=clamp(Math.min(r.width/w, r.height/h),0.45,1.5);
+    const cx=(minx+maxx)/2, cy=(miny+maxy)/2;
+    viewT={ k:k, x:r.width/2-cx*k, y:r.height/2-cy*k }; animate();
+  }
   function collapse(id){ // collapse id and everything under it
     (function rec(x){ N[x].children.forEach(function(c){ expanded.delete(c); rec(c); }); })(id);
     expanded.delete(id); expanded.add(ROOT);

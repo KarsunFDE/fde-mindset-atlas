@@ -74,14 +74,16 @@
   const edges = {};             // id -> line
   let raf = 0, lastAuto = 0;
 
-  /* ---------- layout (radial, expansion-aware) ---------- */
+  /* ---------- layout (radial, expansion-aware, aspect-aware) ---------- */
+  let STRETCH = 1.2;   // widen the tree horizontally on wide screens, narrow it on portrait phones
   function relayout(){
+    const rc = rect(); STRETCH = clamp(rc.width / Math.max(rc.height,1), 0.82, 1.55);
     pos = {};
     walk(ROOT, -Math.PI/2, {x:0,y:0}, 0, Math.PI*2);
   }
   function walk(id, dir, ppos, depth, wedge){
-    const r = depth===0 ? 0 : RAD[Math.min(depth, RAD.length-1)];
-    const p = depth===0 ? {x:0,y:0} : { x: ppos.x + Math.cos(dir)*r, y: ppos.y + Math.sin(dir)*r };
+    const rr = depth===0 ? 0 : RAD[Math.min(depth, RAD.length-1)];
+    const p = depth===0 ? {x:0,y:0} : { x: ppos.x + Math.cos(dir)*rr*STRETCH, y: ppos.y + Math.sin(dir)*rr };
     pos[id] = p;
     if(id in cur === false) cur[id] = depth===0 ? {x:0,y:0} : {x:ppos.x, y:ppos.y}; // spawn from parent
     if(!expanded.has(id)) return;
@@ -121,6 +123,18 @@
         label.textContent = truncate(decode(node.t), node.kind==='root'?20:22);
         const tip = el('title'); tip.textContent = decode(node.t); g.appendChild(tip);
         g.appendChild(ring); g.appendChild(c); g.appendChild(hit); g.appendChild(label);
+        // notes / perspective badge — open this node's detail at its own level
+        const hasViews = !!(node.payload && node.payload.views && node.payload.views.length);
+        const hasContent = (node.payload && (node.payload.body||node.payload.lead||node.payload.video||hasViews)) || node.kind==='branch';
+        if(hasContent){
+          const br=clamp(nodeR(node)*0.85, 7, 10), off=nodeR(node)+br*0.5;
+          const badge=el('g',{class:'notebadge'+(hasViews?' has-views':'')});
+          const bbg=el('circle',{class:'nb-bg', r:br, cx:off, cy:-off}); bbg.style.stroke=node.color;
+          const bic=el('text',{class:'nb-ic', x:off, y:-off+3}); bic.textContent = hasViews ? '◉' : 'i';
+          const btip=el('title'); btip.textContent = hasViews ? 'Open notes + role perspectives' : 'Open notes'; badge.appendChild(btip);
+          badge.appendChild(bbg); badge.appendChild(bic); g.appendChild(badge);
+          badge.addEventListener('click', function(e){ e.stopPropagation(); clearTimeout(clickTimer); openDrawer(id); });
+        }
         gNodes.appendChild(g);
         els[id] = { g:g, dot:c, ring:ring, label:label, hit:hit };
         bindNode(id, g);
@@ -179,8 +193,9 @@
     relayout();
     let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
     visibleIds().forEach(function(id){ const p=pos[id]; minx=Math.min(minx,p.x);miny=Math.min(miny,p.y);maxx=Math.max(maxx,p.x);maxy=Math.max(maxy,p.y); });
-    const r=rect(); const w=Math.max(maxx-minx,200)+160, h=Math.max(maxy-miny,200)+160;
-    const k=clamp(Math.min(r.width/w, r.height/h),0.3,1.4);
+    const r=rect(); const pad = r.width<560 ? 60 : 110;
+    const w=Math.max(maxx-minx,160)+pad*2, h=Math.max(maxy-miny,160)+pad*2;
+    const k=clamp(Math.min(r.width/w, r.height/h),0.32,2.1);
     const cx=(minx+maxx)/2, cy=(miny+maxy)/2;
     viewT={ k:k, x:r.width/2-cx*k, y:r.height/2-cy*k }; animate();
   }
@@ -204,23 +219,49 @@
     sync(); frameNode(focus, clamp(view.k*0.8,0.5,1.2));
   }
 
-  /* ---------- interactions: pan / zoom / click ---------- */
+  /* ---------- interactions: pan / wheel-zoom / pinch-zoom / click ---------- */
   let panning=false, moved=false, sx0,sy0,vx0,vy0;
+  const pointers = new Map();   // active pointers (mouse + touch), for pinch
+  let pinchPrev = null;
   scenePointerInit();
   function scenePointerInit(){
     // pointerdown bubbles up from nodes too; no pointer-capture so node click events still fire
     SVG.addEventListener('pointerdown', function(e){
-      panning=true; moved=false; sx0=e.clientX; sy0=e.clientY; vx0=view.x; vy0=view.y; viewT=null;
+      pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      if(pointers.size===1){ panning=true; moved=false; sx0=e.clientX; sy0=e.clientY; vx0=view.x; vy0=view.y; viewT=null; }
+      else if(pointers.size===2){ panning=false; pinchPrev=pinchState(); }
     });
     window.addEventListener('pointermove', function(e){
+      if(!pointers.has(e.pointerId)) return;
+      pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      if(pointers.size>=2){ moved=true; doPinch(); return; }   // two-finger pinch + pan
       if(!panning) return;
       const dx=e.clientX-sx0, dy=e.clientY-sy0;
       if(Math.abs(dx)+Math.abs(dy)>4) moved=true;
       view.x=vx0+dx; view.y=vy0+dy; applyView();
     });
-    window.addEventListener('pointerup', function(){ panning=false; });
+    window.addEventListener('pointerup', endPtr);
+    window.addEventListener('pointercancel', endPtr);
     SVG.addEventListener('wheel', onWheel, {passive:false});
     SVG.addEventListener('dblclick', function(e){ e.preventDefault(); });
+  }
+  function endPtr(e){
+    pointers.delete(e.pointerId);
+    if(pointers.size<2) pinchPrev=null;
+    if(pointers.size===0){ panning=false; }
+    else if(pointers.size===1){ const p=[...pointers.values()][0]; sx0=p.x; sy0=p.y; vx0=view.x; vy0=view.y; panning=true; }
+  }
+  function pinchState(){
+    const a=[...pointers.values()]; const dx=a[0].x-a[1].x, dy=a[0].y-a[1].y;
+    return { dist:Math.hypot(dx,dy)||1, cx:(a[0].x+a[1].x)/2, cy:(a[0].y+a[1].y)/2 };
+  }
+  function doPinch(){
+    const s=pinchState(); if(!pinchPrev){ pinchPrev=s; return; }
+    const r=rect();
+    const nk=clamp(view.k*(s.dist/pinchPrev.dist), 0.2, 3.6);
+    const mx=s.cx-r.left, my=s.cy-r.top, wx=(mx-view.x)/view.k, wy=(my-view.y)/view.k;
+    view.k=nk; view.x=mx-wx*nk + (s.cx-pinchPrev.cx); view.y=my-wy*nk + (s.cy-pinchPrev.cy);
+    pinchPrev=s; viewT=null; applyView();
   }
   function onWheel(e){
     e.preventDefault();
@@ -274,16 +315,17 @@
   /* ---------- detail drawer ---------- */
   const drawer=document.getElementById('drawer'), scrim=document.getElementById('scrim');
   function openDrawer(id){
-    const node=N[id]; const n=node.payload; const collector=new Set();
+    const node=N[id]; const n=node.payload||{}; const collector=new Set();
+    const lead = n.lead || node.lead;
     let html='<button class="dr-close" id="drClose" aria-label="close">&times;</button>';
     html+='<div class="dr-kicker" style="color:'+node.color+'">'+breadcrumbText(id)+'</div>';
     html+='<h2 class="dr-title">'+node.t+'</h2>';
-    if(n.lead) html+='<p class="dr-lead">'+cite(n.lead,collector)+'</p>';
+    if(lead) html+='<p class="dr-lead">'+cite(lead,collector)+'</p>';
     if(n.body) html+='<div class="dr-body item-body">'+cite(n.body,collector)+'</div>';
     if(n.video) html+=videoHTML(n.video);
-    if(n.views) html+=viewsHTML(n.views,collector);
+    if(n.views) html+='<div class="dr-views-label">Switch perspective &mdash; same node, different roles</div>'+viewsHTML(n.views,collector);
     if(node.children.length){
-      html+='<div class="dr-children"><div class="deeper-label">Deeper layers &mdash; explore on the map</div>';
+      html+='<div class="dr-children"><div class="deeper-label">'+(node.kind==='branch'?'In this branch':'Deeper layers')+' &mdash; explore on the map</div>';
       node.children.forEach(function(cid){ html+='<button class="dr-jump" data-jump="'+cid+'" style="--bcolor:'+node.color+'">'+N[cid].t+' &rarr;</button>'; });
       html+='</div>';
     }
@@ -325,6 +367,7 @@
     document.getElementById('cExpand').onclick=function(){ // expand everything (full puzzle)
       Object.keys(N).forEach(function(id){ if(N[id].children.length) expanded.add(id); }); sync(); fitAll(); };
     document.getElementById('brand').onclick=function(){ expanded.clear(); expanded.add(ROOT); focus=ROOT; sync(); fitAll(); };
+    const hx=document.getElementById('hintX'); if(hx) hx.onclick=function(){ const h=document.getElementById('hudHint'); if(h) h.style.display='none'; };
   }
   function zoomBtn(f){ const r=rect(); const mx=r.width/2,my=r.height/2; const nk=clamp(view.k*f,0.28,3.2);
     const wx=(mx-view.x)/view.k, wy=(my-view.y)/view.k; viewT={k:nk,x:mx-wx*nk,y:my-wy*nk}; animate(); }
@@ -339,7 +382,8 @@
     sync(); fitAll();
     // deep-link
     if(location.hash.indexOf('#node/')===0){ const id=location.hash.slice(6); if(N[id]){ let x=N[id].parent; const chain=[]; while(x){chain.unshift(x);x=N[x].parent;} chain.forEach(function(c){if(N[c].children.length)expanded.add(c);}); sync(); setTimeout(function(){ if(N[id].payload) openDrawer(id); frameNode(id,1.2); },200); } }
-    window.addEventListener('resize', function(){ applyView(); });
+    let rzT; window.addEventListener('resize', function(){ clearTimeout(rzT); rzT=setTimeout(function(){ sync(); fitAll(); }, 180); });
+    window.addEventListener('orientationchange', function(){ setTimeout(function(){ sync(); fitAll(); }, 250); });
   }
   boot();
 })();

@@ -29,11 +29,13 @@
       <button id="cExpand" title="Expand the whole map">&#9783;</button>
       <button id="cReset" title="Reset view">&#8635;</button>
     </div>
-    <div class="hud-hint">
-      <strong>Click</strong> a node to expand it &amp; reveal its edges ·
-      <strong>scroll-in near a node</strong> to dive deeper ·
-      <strong>scroll-out</strong> to climb back ·
-      <strong>drag</strong> to pan · click a leaf to read the cited detail.
+    <div class="hud-hint" id="hudHint">
+      <button class="hint-x" id="hintX" aria-label="dismiss">&times;</button>
+      <span class="hint-full"><strong>Tap / click</strong> a node to expand it &amp; reveal its edges &middot;
+      tap the <strong>&#9432; / &#9673;</strong> badge to read its notes &amp; switch role perspectives &middot;
+      <strong>scroll or pinch</strong> to zoom (zoom in near a node to dive deeper) &middot;
+      <strong>drag</strong> to pan.</span>
+      <span class="hint-mini">Tap node = expand &middot; tap &#9432; = notes/perspectives &middot; pinch = zoom</span>
     </div>
   </div>
 

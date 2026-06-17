@@ -215,7 +215,36 @@ body.graph-mode header.bar{flex:0 0 auto}
   background:var(--panel);border:1px solid var(--line);color:var(--ink);font-size:.9rem;transition:all .15s}
 .dr-jump:hover{border-color:var(--bcolor,var(--accent));color:var(--bcolor,var(--accent));transform:translateX(3px)}
 
+/* notes / perspective badge on each content node */
+.notebadge{cursor:pointer;opacity:.5;transition:opacity .15s}
+.gnode:hover .notebadge{opacity:1}
+.notebadge .nb-bg{fill:#0b1220;stroke-width:1.5}
+.notebadge:hover .nb-bg{fill:#17273e}
+.notebadge .nb-ic{fill:#e6eefb;font:700 9px var(--mono);text-anchor:middle;pointer-events:none}
+.notebadge.has-views .nb-bg{fill:#152a22}
+.notebadge.has-views .nb-ic{font-size:8px}
+@media(pointer:coarse){ .notebadge{opacity:.92} }
+
+/* drawer: perspective switcher label */
+.dr-views-label{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-faint);margin:20px 0 8px;display:flex;align-items:center;gap:8px}
+.dr-views-label::before{content:"◉";color:var(--accent)}
+
+/* hint variants + dismiss */
+.hud-hint{position:relative}
+.hint-mini{display:none}
+.hint-x{position:absolute;top:-10px;right:-10px;width:22px;height:22px;border-radius:50%;
+  border:1px solid var(--line2);background:#11203a;color:var(--ink-dim);cursor:pointer;
+  font-size:1rem;line-height:20px;pointer-events:auto;padding:0}
+.hint-x:hover{color:var(--accent);border-color:var(--accent)}
+
 @media(max-width:640px){
-  .hud-hint{font-size:.68rem;padding:7px 12px}
-  #drawer{padding:50px 18px 50px}
+  .hud-hint{font-size:.72rem;padding:8px 14px;bottom:12px;max-width:94vw}
+  .hint-full{display:none}
+  .hint-mini{display:inline}
+  .hud-controls{top:10px;left:10px;gap:7px}
+  .hud-controls button{width:44px;height:44px}     /* larger touch targets */
+  #drawer{width:100vw;padding:52px 16px 48px}
+  .dr-title{font-size:1.3rem}
+  .gnode .lbl{font-size:13px}                        /* a touch larger for small screens */
 }

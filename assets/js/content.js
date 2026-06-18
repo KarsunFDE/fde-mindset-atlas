@@ -650,10 +650,16 @@ const BRANCHES = [
     lead: "Every claim on this map is backed by a citation. Start with the videos, then follow the source links. This list grows with every research pass.",
     nodes: [
       {
-        t: "Watch first",
-        lead: "Two videos that frame the whole map.",
-        body: "<p>Embedded below: the Galent FDE Session 1 (instructor copy) and Bob McGrew's YC FDE Playbook keynote.</p>",
+        t: "Watch first &mdash; Session 1: What is an FDE?",
+        lead: "Galent FDE Session 1 (instructor copy) &mdash; the role, the mindset, the 4-step method, and the co-pilot/HITL thesis.",
+        body: "<p>Start here. Presenter: Archit. [[VIMEO]]</p>",
         video: "vimeoSession1"
+      },
+      {
+        t: "Watch second &mdash; Session 2: Stellantis walkthrough + platform",
+        lead: "Galent FDE Session 2 (instructor copy) &mdash; the Stellantis app-mod case study and the full Galent platform deep-dive (7-step pipeline, external analysis, code companion).",
+        body: "<p>Watch after Session 1. This is the source behind the whole App Modernization branch. Presenter: Archit. [[VIMEO2]]</p>",
+        video: "galentSession2"
       },
       {
         t: "Bob McGrew &mdash; The FDE Playbook (YC)",

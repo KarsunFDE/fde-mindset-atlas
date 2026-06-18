@@ -40,11 +40,13 @@ const SOURCES = {
   GALENTMA:  { t: "Galent — Claude Managed Agents vs. Enterprise AI Platforms", url: "https://galent.com/insights/blogs/claude-managed-agents-vs-enterprise-ai-platforms/", d: "2026-05" },
   // --- videos ---
   YCFDE:     { t: "Y Combinator — The FDE Playbook for AI Startups with Bob McGrew (50 min)", url: "https://www.youtube.com/watch?v=Zyw-YA0k3xo", d: "2025-09-08" },
-  VIMEO:     { t: "Galent FDE Session 1 — What is an FDE? (private, instructor copy)", url: "https://vimeo.com/1202201578/3c00b899c5", d: "2026" }
+  VIMEO:     { t: "Galent FDE Session 1 — What is an FDE? (private, instructor copy)", url: "https://vimeo.com/1202201578/3c00b899c5", d: "2026" },
+  VIMEO2:    { t: "Galent FDE Session 2 — Stellantis app-mod walkthrough + Galent platform deep-dive (private, instructor copy)", url: "https://vimeo.com/1202558378/f4d9043652", d: "2026" }
 };
 
 const VIDEOS = {
   vimeoSession1: { kind: "vimeo", id: "1202201578", hash: "3c00b899c5", title: "Galent FDE Session 1 — What is an FDE?", src: "VIMEO" },
+  galentSession2:{ kind: "vimeo", id: "1202558378", hash: "f4d9043652", title: "Galent FDE Session 2 — Stellantis walkthrough + platform deep-dive", src: "VIMEO2" },
   ycMcGrew:      { kind: "youtube", id: "Zyw-YA0k3xo", title: "The FDE Playbook for AI Startups — Bob McGrew (Y Combinator)", src: "YCFDE" }
 };
 
@@ -341,18 +343,53 @@ const BRANCHES = [
       },
       {
         t: "The Galent app-mod pipeline (7 steps)",
-        lead: "What the FDE does by hand, the platform pipelines &mdash; ingestion to a ready-to-build backlog to an implementation agent. A co-pilot, not autopilot.",
-        body: "<p><strong>Inputs:</strong> source code, documentation, MOM (minutes of meeting), DB schema, client data + the target-state config. <strong>Outputs:</strong> an understanding of the existing app, a modernized target design (security, DB, data-migration strategy, features, architecture), and a <strong>ready-to-build backlog</strong> (epics/stories/subtasks straight into Jira, fetched in implementation order). [[VIMEO]]</p>",
+        lead: "What the FDE does by hand, the platform pipelines &mdash; ingestion to a ready-to-build backlog to an implementation workbench. A co-pilot, not autopilot. Session 2 walks the whole thing on the Stellantis code base.",
+        body: "<p><strong>Inputs:</strong> source code, documentation, MOM (minutes of meeting), DB schema, client data + the target-state config. <strong>Outputs:</strong> an understanding of the existing app, a modernized target design (security, DB, data-migration strategy, features, architecture), and a <strong>ready-to-build backlog</strong> (epics/stories/subtasks straight into Jira, fetched in implementation order). [[VIMEO]] Each step below expands with the actual platform process shown in the Session 2 walkthrough. [[VIMEO2]]</p>",
+        video: "galentSession2",
         deeper: [
           {
-            t: "1 &middot; Ingestion of sources",
-            lead: "Ingest the legacy codebase + all client sources; map the correlation of features &harr; data schema &harr; user persona.",
-            body: "<p>The platform ingests the legacy code and sources, infers the business features behind them, and builds a correlation map &mdash; features, data schema, personas. This is a <strong>company-graph</strong> step in disguise (see the Graphs branch). [[VIMEO]]</p>"
+            t: "1 &middot; Ingestion of sources (Application Discovery)",
+            lead: "Ingest the legacy codebase + all client sources; agents produce application understanding, features, and business features, and map features &harr; data schema &harr; persona.",
+            body: "<p>The platform ingests the legacy code and sources, infers the business features behind them, and builds a correlation map &mdash; features, data schema, personas. This is a <strong>company-graph</strong> step in disguise (see the Graphs branch). [[VIMEO]] In Session 2 this is the <strong>Application Discovery</strong> surface, built precisely to fill the gaps the platform was missing on a mainframe code base. [[VIMEO2]]</p>",
+            deeper: [
+              {
+                t: "Application at a glance",
+                lead: "Who uses it, what the system does, and what it integrates with &mdash; on one screen.",
+                body: "<p>Discovery agents produce: <strong>who uses it</strong> (Stellantis: receiving clerks, storage attendants, material handlers); <strong>system logic</strong> (it records every part movement at the plant dock and prints movement tickets directing handlers to the right destination); and <strong>external integrations</strong> (plant shop-floor display, supervisor email, pager-alert system). The architecture diagram and user personas are auto-generated from a single ingestion. [[VIMEO2]]</p>"
+              },
+              {
+                t: "Features &rarr; business features &rarr; capabilities",
+                lead: "Three layers: technical features from code, business features layered on top, capabilities as the grouping.",
+                body: "<p>Technical <strong>features</strong> come straight from the code. <strong>Business features</strong> are layered on top &mdash; these need the external docs, MoMs, and client calls the code alone can't give you. <strong>Capabilities</strong> group features by how they're organized (e.g. a &lsquo;controlled-storage operation&rsquo; capability groups ~8 business features that map back to technical features). [[VIMEO2]]</p>"
+              },
+              {
+                t: "16 analysis layers + managed sources",
+                lead: "The platform runs ~16 layers of analysis; managed sources feed everything downstream.",
+                body: "<p>~16 layers of analysis run on ingestion. <strong>Managed sources</strong> let you add file groups (requirements, minutes-of-meeting, logs, custom labels) and connect the external repo &mdash; and anything you upload there (including external-analysis findings) is pulled into target-state generation. [[VIMEO2]]</p>"
+              }
+            ]
           },
           {
             t: "2 &middot; Target-state generation",
             lead: "A complete modernized design + config + security &mdash; &ldquo;dissect the whole application before it is built.&rdquo;",
-            body: "<p>Lots of back-and-forth with the customer, with walkthrough checkpoints at each intermediary step (architecture diagram, parameters). [[VIMEO]]</p>"
+            body: "<p>Lots of back-and-forth with the customer, with walkthrough checkpoints at each intermediary step (architecture diagram, parameters). [[VIMEO]]</p>",
+            deeper: [
+              {
+                t: "Target-state configuration &mdash; pick the path",
+                lead: "Choose the modernization path, then the in-scope features.",
+                body: "<p>This is where the big decisions land: choose the path &mdash; <strong>Cloud Native</strong>, <strong>Databricks</strong>, or <strong>Salesforce</strong> (Salesforce was added for a recent engagement and is in active use) &mdash; then select the in-scope features. UI/UX, DB, language, and deployment all flow from this config. [[VIMEO2]]</p>"
+              },
+              {
+                t: "Scope selection &mdash; the POC",
+                lead: "Pick the critical modules that prove the capability.",
+                body: "<p>For a POC you select the critical modules that showcase what an FDE + the platform can do. The Stellantis POC = the <strong>Replenishment Management System</strong> (when a part runs low in the warehouse, raise and fulfil a replenish order) &mdash; ~<strong>21K in-scope lines</strong> out of ~140&ndash;200K for the whole controlled-storage application. [[VIMEO2]]</p>"
+              },
+              {
+                t: "Target-state results",
+                lead: "Files analyzed, an executive summary, and the modernized design.",
+                body: "<p>The results surface the number of files analyzed, an executive summary, and the modernized design you can inspect before a line is built. [[VIMEO2]]</p>"
+              }
+            ]
           },
           {
             t: "3 &middot; Target-state walkthrough &amp; validation",
@@ -362,22 +399,60 @@ const BRANCHES = [
           {
             t: "4 &middot; Implementation-specs generation",
             lead: "From the target state, a spec that reads as a statement of work &mdash; agreed with the client.",
-            body: "<p>The implementation spec is the agreed plan for how the whole modernized build will go. [[VIMEO]]</p>"
+            body: "<p>The implementation spec is the agreed plan for how the whole modernized build will go. [[VIMEO]]</p>",
+            deeper: [
+              {
+                t: "Design documents ship with the spec",
+                lead: "Architecture, non-functionals, testing, data migration, rollout.",
+                body: "<p>The spec comes with design documents for the selected scope: <strong>architecture overview, non-functional requirements, recommended testing strategy, data-migration strategy, and the delivery / rollout plan.</strong> [[VIMEO2]]</p>"
+              },
+              {
+                t: "Auto-generated, then validated",
+                lead: "Derived from in-scope capabilities + target config; editable after client sign-off.",
+                body: "<p>Specs are derived from the in-scope capabilities and the target-state config and are auto-generated; you can edit them after client validation, but if the earlier steps were solid you rarely need to &mdash; this step &ldquo;flows smoothly.&rdquo; [[VIMEO2]]</p>"
+              }
+            ]
           },
           {
             t: "5 &middot; Epics &amp; stories &mdash; the BA's surface",
             lead: "Business-friendly language, no technical jargon or file names, so the BA can validate without reading code.",
-            body: "<blockquote>&ldquo;Epics and stories we want in a very business-friendly language that the business analyst can validate. If it contains technical jargon and file names, that makes it complicated for them &mdash; they'd have to look into the codebase, and that's not the way of work.&rdquo; [[VIMEO]]</blockquote><p>This is where the client-side BA &ldquo;shines&rdquo;: time estimates, resource planning, accept/adjust the flow. [[VIMEO]] (Cross-ref the Decomposition branch.)</p>"
+            body: "<blockquote>&ldquo;Epics and stories we want in a very business-friendly language that the business analyst can validate. If it contains technical jargon and file names, that makes it complicated for them &mdash; they'd have to look into the codebase, and that's not the way of work.&rdquo; [[VIMEO]]</blockquote><p>This is where the client-side BA &ldquo;shines&rdquo;: time estimates, resource planning, accept/adjust the flow. [[VIMEO]] (Cross-ref the Decomposition branch.)</p>",
+            deeper: [
+              {
+                t: "What the BA sees vs what the agent sees",
+                lead: "Highlighted items go to the BA; platform notes &amp; labels go to the agent/developer.",
+                body: "<p>In the work breakdown the <strong>highlighted items</strong> (capability layer &rarr; epics &rarr; story features) are what the business analyst reviews; the <strong>platform notes &amp; labels</strong> are for the agent/developer. The BA review is a milestone &mdash; any missed feature is caught here, before development. [[VIMEO2]]</p>"
+              }
+            ]
           },
           {
             t: "6 &middot; Sub-tasks &mdash; the engineer's / agent's surface",
             lead: "Technically specific: technical spec + definition of done + the relevant legacy files, so a dev OR an AI agent can execute.",
-            body: "<blockquote>&ldquo;Sub-tasks are technically specific &mdash; technical specification, definition of done, and all the relevant files from the existing legacy codebase, so any dev <em>or any AI agent</em> working on the sub-task can understand the code that existed alongside the spec and the expected outcome.&rdquo; [[VIMEO]]</blockquote><p>Note the deliberate split: epics/stories carry <em>no</em> file names (BA surface); sub-tasks carry the legacy file references (engineer/agent surface). That is the BA-vs-engineer boundary, made literal. [[VIMEO]]</p>"
+            body: "<blockquote>&ldquo;Sub-tasks are technically specific &mdash; technical specification, definition of done, and all the relevant files from the existing legacy codebase, so any dev <em>or any AI agent</em> working on the sub-task can understand the code that existed alongside the spec and the expected outcome.&rdquo; [[VIMEO]]</blockquote><p>Note the deliberate split: epics/stories carry <em>no</em> file names (BA surface); sub-tasks carry the legacy file references (engineer/agent surface). That is the BA-vs-engineer boundary, made literal. [[VIMEO]]</p>",
+            deeper: [
+              {
+                t: "Generated only after BA feedback",
+                lead: "Sub-tasks aren't produced up front &mdash; they follow the BA's edits.",
+                body: "<p>The platform does not jump to sub-tasks. Only after the BA's comments and edits on epics/stories are folded in does it split stories into sub-tasks &mdash; technical jargon, definition of done, and the legacy files each maps to, &ldquo;so you do not want to overwhelm a business analyst with that.&rdquo; [[VIMEO2]]</p>"
+              }
+            ]
           },
           {
-            t: "7 &middot; The implementation agent (code companion)",
-            lead: "Triggers per sub-task, wraps each in ~5&ndash;7 minutes; plans, checks for duplication, implements, commits, resolves conflicts.",
-            body: "<p>&ldquo;Understand it as a software engineer itself&rdquo; &mdash; it designs the plan for the sub-task, checks the codebase for existing implementations / duplication, and once the plan is validated, implements and commits, handling conflicts. ~5&ndash;7 minutes per sub-task. [[VIMEO]]</p>"
+            t: "7 &middot; Implementation workbench + code companion",
+            lead: "Stories, a VS Code editor, and a code companion in one place. (Session 1 framed the per-sub-task agent as ~5&ndash;7 min.)",
+            body: "<p>In the <strong>implementation workbench</strong> the platform puts your scoped stories on one side, a VS Code-style editor in the middle, and the <strong>code companion</strong> on the other &mdash; so editing, running, and reviewing happen in one place. [[VIMEO2]] Session 1 framed the per-sub-task agent as &ldquo;a software engineer itself&rdquo; that plans, checks for duplication, implements, commits, and resolves conflicts &mdash; ~5&ndash;7 minutes per sub-task. [[VIMEO]]</p>",
+            deeper: [
+              {
+                t: "The workbench &mdash; three panes",
+                lead: "Stories | editor | companion.",
+                body: "<p>Your selected scope (Epic 1 / 2 / 3) sits on one side; a parallel <strong>VS Code editor</strong> lets you develop and edit inside the platform; the <strong>code companion</strong> runs alongside. [[VIMEO2]]</p>"
+              },
+              {
+                t: "Code companion = a team of agents",
+                lead: "Not one model &mdash; a group of agents across UI/UX, front-end, and back-end.",
+                body: "<p>The code companion is a <strong>group of agents</strong> with expertise across UI/UX, front-end, and back-end languages. It takes a story, generates the code and tasks, has compile visibility to run commands, pushes to your repo, and raises/reviews the PR &mdash; in-companion or via GitHub / Bitbucket / Azure DevOps. [[VIMEO2]]</p>"
+              }
+            ]
           }
         ]
       },
@@ -394,6 +469,44 @@ const BRANCHES = [
         t: "Field jargon (defined in Session 1)",
         lead: "The vocabulary the cohort needs to follow a real modernization call.",
         body: "<table class='trap-table'><tr><th>Term</th><th>Meaning</th></tr><tr><td>Legacy system</td><td>Old software a business still relies on (e.g. Stellantis' COBOL warehouse system).</td></tr><tr><td>POC</td><td>Proof of concept on 1&ndash;2 critical modules first &mdash; lays the foundation for the whole project.</td></tr><tr><td>Current / target state</td><td>Where the app is now vs the modernized design you're driving toward.</td></tr><tr><td>Mainframe / COBOL / IBM z/OS</td><td>The legacy stack the Stellantis system was written on.</td></tr><tr><td>Specs</td><td>The documentation of what the modernized target state will be.</td></tr><tr><td>SME</td><td>Subject-matter expert &mdash; request from employer or client for unfamiliar tech. Encouraged.</td></tr><tr><td>FD support</td><td>An existing FDE supporting you (~6 months, phase 3) &mdash; distinct from a client SME.</td></tr><tr><td>BA</td><td>Business analyst &mdash; reviews impact <em>preemptively</em>, validates epics/stories.</td></tr></table><p class='cite-line'>All defined in Galent FDE Session 1. [[VIMEO]]</p>"
+      },
+      {
+        t: "External analysis with AI agents (Claude Code)",
+        lead: "When the platform can't fully handle a code base, the FDE runs a parallel analysis in Claude Code &mdash; then pipes the findings back in. This is FDE discretion in action, not a platform step.",
+        body: "<p>The platform is generalized across many code bases; a mainframe-COBOL app of Stellantis' size and type exposed gaps in the early platform. The FDE's move: clone the customer repo locally, open <strong>Claude Code</strong> in that directory, design analysis agents, run them in parallel to validate the platform's output &mdash; then <strong>pipe the findings back into the platform</strong> (as a managed-source file group) so they flow into target-state + specs. [[VIMEO2]]</p><blockquote>&ldquo;If the playbook is working fine, you don't step in &mdash; you let it work. If it doesn't, you step in and make it work. It's a firefighter thing.&rdquo; [[VIMEO2]]</blockquote>",
+        views: [
+          { r: "Why a second look", t: "In COBOL, a critical feature can live in a 100-line program while a 14&ndash;15K-line file overshadows it in the platform's analysis. External analysis catches what gets buried. [[VIMEO2]]" },
+          { r: "What it caught on Stellantis", t: "Feature <strong>de-duplication</strong> (one capability counted twice across two programs), <strong>ghost programs</strong> (citations to programs that don't exist = hallucinations), and a <strong>missing data schema</strong> (absent from the sources &mdash; they had to request a business doc + sample data). [[VIMEO2]]" },
+          { r: "FDE discretion", t: "100% required throughout. You take the platform's help, SME help, FD-support help, and external AI analysis &mdash; whatever gets a holistic, unbiased picture. [[VIMEO2]]" }
+        ],
+        deeper: [
+          {
+            t: "The 4-layer prompt structure",
+            lead: "Archit's preferred prompt for an external-analysis agent &mdash; consistent across projects.",
+            body: "<ol><li><strong>Read the actual code</strong> &mdash; no guesses, no assumptions.</li><li><strong>Cite the evidence</strong> &mdash; point to the location in the code; never cite what isn't in the source (the anti-hallucination guardrail).</li><li><strong>Extract what exists</strong> &mdash; de-duplicate against the platform's prior analysis (save the ~16 platform docs into one MD, give its path, ask the agent to rate that analysis' accuracy <em>and</em> do its own exploration); process huge files in batches, be exhaustive, skip no features.</li><li><strong>Phases of approach + accuracy mapping</strong> &mdash; provide the source location and the already-found domains, then have it work the analysis in phases and list how accurate each finding is.</li></ol><p class='note'>The <em>verbatim</em> prompt (and the exported agent JSON) were promised to the cohort in chat. Once provided they'll be rendered here exactly. [[VIMEO2]]</p>"
+          },
+          {
+            t: "Pipe the findings back in",
+            lead: "External analysis isn't a dead end &mdash; it re-enters the platform.",
+            body: "<p>Upload the external findings as a managed-source file group (e.g. a doc that states a de-duplicated capability and <em>why</em> it was duplicated). The platform then factors it into target-state generation and the specs. Stellantis ran three external passes in Claude Code: the whole controlled-storage app, the in-scope home-location replenishment, and a business-capability analysis (after the data schema arrived). [[VIMEO2]]</p>"
+          }
+        ]
+      },
+      {
+        t: "Stellantis &mdash; the case study (Session 2)",
+        lead: "A Fortune-500 automotive maker running just-in-time manufacturing on a 31&ndash;33-year-old mainframe-COBOL warehouse system. The worked example behind every step above.",
+        body: "<p>Stellantis runs <strong>just-in-time</strong> manufacturing with predictive volume projections; production fires on order. Its <strong>Controlled Storage Application</strong> is a mainframe-COBOL <strong>Kanban / warehouse-management</strong> system &mdash; 31&ndash;33 years old, with incremental patches and feature additions in 2018 and 2023. The crux: if the modernized app doesn't match the business model, <strong>the production line stops</strong> &mdash; loss on a minute-to-minute basis. [[VIMEO2]]</p>",
+        video: "galentSession2",
+        views: [
+          { r: "Phased rollout (strangler fig)", t: "You don't cut over in a day. Group modules into domains and migrate in phased milestones &mdash; the <strong>strangler-fig</strong> pattern &mdash; deploying the modernized app in stages. [[VIMEO2]]" },
+          { r: "The team", t: "For a Java + Angular target: one Java-specialist FDE, one Angular-specialist FDE, and an <strong>architect-level FDE</strong> who owns how the legacy maps to the new system. [[VIMEO2]]" },
+          { r: "The cadence", t: "A relaxed three-week rhythm: analysis (with client-call validation) ~week 1, target state ~week 2, generated features ~week 3 &mdash; flexed for client reorgs and tracking down 33-year-old-system SMEs. [[VIMEO2]]" }
+        ]
+      },
+      {
+        t: "The agent builder &amp; NeuroQL",
+        lead: "You don't hand-craft agents &mdash; you describe them and the platform builds them, with a visual builder for prompt structure, skills/tools, and task steps. Export as JSON into Claude Code.",
+        body: "<p>Describe the agent and the platform builds it on the fly. The <strong>visual builder</strong> exposes each agent's prompting structure, its skills &amp; tools, and its task / workflow steps; prompt enhancement (role definition, behavior guidelines, error handling) is AI-assisted from templates. You can design an agent in-platform, then export it as <strong>JSON</strong> and drop it into Claude Code for external analysis. [[VIMEO2]]</p><p><strong>NeuroQL</strong> agents expose their prompting structure and phases too &mdash; e.g. a query-router agent with behavioral guidelines and a defined output format. [[VIMEO2]]</p>"
       }
     ]
   },

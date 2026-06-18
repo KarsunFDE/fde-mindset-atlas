@@ -27,6 +27,13 @@ const SOURCES = {
   SDD_BCMS:  { t: "BCMS — Spec-Driven Development (SDD): The Definitive 2026 Guide", url: "https://thebcms.com/blog/spec-driven-development", d: "2026-05-11" },
   SPECKIT:   { t: "GitHub — Spec-Driven Development with AI: get started with GitHub Spec Kit (open-source toolkit)", url: "https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/", d: "2025" },
   KIRO:      { t: "AWS Kiro — agentic IDE with a native spec-driven workflow (Requirements / Design / Tasks)", url: "https://kiro.dev/", d: "2025" },
+  // --- modernization patterns & agent/coding practice (external backing) ---
+  FOWLER_SF: { t: "Martin Fowler — Strangler Fig Application (gradual legacy modernization)", url: "https://martinfowler.com/bliki/StranglerFigApplication.html", d: "2024" },
+  FOWLER_FP: { t: "Martin Fowler / Thoughtworks — Patterns of Legacy Displacement: Feature Parity (the 'feature-parity trap')", url: "https://martinfowler.com/articles/patterns-legacy-displacement/feature-parity.html", d: "2024" },
+  AWS_SF:    { t: "AWS Prescriptive Guidance — Strangler fig pattern", url: "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/strangler-fig.html", d: "2024" },
+  CC_BP:     { t: "Anthropic — Best practices for Claude Code (explore → plan → code; verify; specific context)", url: "https://code.claude.com/docs/en/best-practices", d: "2026" },
+  ANTH_AGENTS:{ t: "Anthropic — Building Effective Agents (workflows vs agents; orchestrator-workers; composable patterns)", url: "https://www.anthropic.com/engineering/building-effective-agents", d: "2025" },
+  FEATHERS:  { t: "Characterization (golden-master) tests — Michael Feathers, Working Effectively with Legacy Code", url: "https://en.wikipedia.org/wiki/Characterization_test", d: "2004+" },
   // --- platforms: ReDuX / Karsun ---
   AWSPS:     { t: "AWS Public Sector Blog — Karsun builds modernization platform on Amazon Bedrock", url: "https://aws.amazon.com/blogs/publicsector/karsun-solutions-builds-modernization-platform-using-amazon-bedrock/", d: "2024-03-19" },
   AWSMP:     { t: "AWS Marketplace — Karsun ReDuX (SaaS listing)", url: "https://aws.amazon.com/marketplace/pp/prodview-ewysxj3be4vra", d: "2025-07-30" },
@@ -450,7 +457,7 @@ const BRANCHES = [
               {
                 t: "Code companion = a team of agents",
                 lead: "Not one model &mdash; a group of agents across UI/UX, front-end, and back-end.",
-                body: "<p>The code companion is a <strong>group of agents</strong> with expertise across UI/UX, front-end, and back-end languages. It takes a story, generates the code and tasks, has compile visibility to run commands, pushes to your repo, and raises/reviews the PR &mdash; in-companion or via GitHub / Bitbucket / Azure DevOps. [[VIMEO2]]</p>"
+                body: "<p>The code companion is a <strong>group of agents</strong> with expertise across UI/UX, front-end, and back-end languages. It takes a story, generates the code and tasks, has compile visibility to run commands, pushes to your repo, and raises/reviews the PR &mdash; in-companion or via GitHub / Bitbucket / Azure DevOps. [[VIMEO2]]</p><p class='note'>This is the textbook <strong>orchestrator-workers</strong> pattern Anthropic documents: a lead agent decomposes the task and delegates to specialized sub-agents &mdash; the recommended shape for &ldquo;medium-complexity tasks where subtasks are less predictable, like multi-file coding.&rdquo; Anthropic's own guidance: the best agentic systems use <em>simple, composable patterns</em>, not heavy frameworks. [[ANTH_AGENTS]]</p>"
               }
             ]
           }
@@ -489,6 +496,11 @@ const BRANCHES = [
             t: "Pipe the findings back in",
             lead: "External analysis isn't a dead end &mdash; it re-enters the platform.",
             body: "<p>Upload the external findings as a managed-source file group (e.g. a doc that states a de-duplicated capability and <em>why</em> it was duplicated). The platform then factors it into target-state generation and the specs. Stellantis ran three external passes in Claude Code: the whole controlled-storage app, the in-scope home-location replenishment, and a business-capability analysis (after the data schema arrived). [[VIMEO2]]</p>"
+          },
+          {
+            t: "Why this mirrors Claude Code's own best practices",
+            lead: "Archit's 4 layers aren't ad-hoc &mdash; they line up almost 1:1 with Anthropic's documented agentic-coding guidance.",
+            body: "<table class='trap-table'><tr><th>Archit's layer [[VIMEO2]]</th><th>Anthropic's documented practice [[CC_BP]]</th></tr><tr><td>Read the actual code first; no guesses</td><td><strong>Explore first, then plan, then code</strong> &mdash; in plan mode Claude reads files and answers questions <em>before</em> changing anything; separating research from execution &ldquo;helps avoid solving the wrong problem.&rdquo;</td></tr><tr><td>Cite the evidence; accuracy mapping</td><td><strong>Give the agent a way to verify its work</strong>; address root causes, not symptoms &mdash; verification is &ldquo;the highest-leverage practice.&rdquo;</td></tr><tr><td>Give the path to the prior 16-doc analysis + source location</td><td><strong>Provide specific context</strong> &mdash; reference specific files, point to example patterns, and let Claude fetch what it needs.</td></tr><tr><td>Batch huge files; be exhaustive</td><td><strong>Manage the context window</strong> &mdash; performance degrades as context fills, so scope work deliberately.</td></tr></table><p>So &ldquo;use Claude Code for external analysis&rdquo; isn't a personal quirk &mdash; the prompt structure is the vendor-recommended shape. [[CC_BP]][[ANTH_AGENTS]]</p>"
           }
         ]
       },
@@ -498,15 +510,32 @@ const BRANCHES = [
         body: "<p>Stellantis runs <strong>just-in-time</strong> manufacturing with predictive volume projections; production fires on order. Its <strong>Controlled Storage Application</strong> is a mainframe-COBOL <strong>Kanban / warehouse-management</strong> system &mdash; 31&ndash;33 years old, with incremental patches and feature additions in 2018 and 2023. The crux: if the modernized app doesn't match the business model, <strong>the production line stops</strong> &mdash; loss on a minute-to-minute basis. [[VIMEO2]]</p>",
         video: "galentSession2",
         views: [
-          { r: "Phased rollout (strangler fig)", t: "You don't cut over in a day. Group modules into domains and migrate in phased milestones &mdash; the <strong>strangler-fig</strong> pattern &mdash; deploying the modernized app in stages. [[VIMEO2]]" },
+          { r: "Phased rollout (strangler fig)", t: "You don't cut over in a day. Group modules into domains and migrate in phased milestones &mdash; the <strong>strangler-fig</strong> pattern &mdash; deploying the modernized app in stages. [[VIMEO2]] Martin Fowler's canonical version: grow the new system around the legacy one behind a façade, move behaviour across incrementally, and let the old system shrink &mdash; gradual, visible investment with earlier ROI and far less risk than a big-bang rewrite. [[FOWLER_SF]][[AWS_SF]]" },
           { r: "The team", t: "For a Java + Angular target: one Java-specialist FDE, one Angular-specialist FDE, and an <strong>architect-level FDE</strong> who owns how the legacy maps to the new system. [[VIMEO2]]" },
           { r: "The cadence", t: "A relaxed three-week rhythm: analysis (with client-call validation) ~week 1, target state ~week 2, generated features ~week 3 &mdash; flexed for client reorgs and tracking down 33-year-old-system SMEs. [[VIMEO2]]" }
+        ],
+        deeper: [
+          {
+            t: "Why not a naive feature-parity rewrite?",
+            lead: "&ldquo;Just rebuild exactly what it does, in new tech&rdquo; is the trap &mdash; and it's why the FDE method leads with business understanding + target state, not blind cloning.",
+            body: "<p>Fowler calls like-for-like replacement the <strong>&ldquo;feature-parity trap&rdquo;</strong>: teams &ldquo;greatly underestimate the effort,&rdquo; and just <em>defining the 'as-is' scope</em> is enormous for a system that's become core to the business. Worse, legacy systems bloat &mdash; a 2014 Standish Group report found <strong>~50% of features go unused</strong>, and old bug-workarounds calcify into &ldquo;must-have&rdquo; requirements. Rebuilding all of it &ldquo;is not only waste, it's a missed opportunity to build what's actually needed today.&rdquo; [[FOWLER_FP]]</p><p>That is exactly why Stellantis started from the <em>business model</em> and a scoped POC (replenishment), not a 1:1 COBOL clone &mdash; modernize the value, drop the cruft. [[VIMEO2]]</p>"
+          }
         ]
       },
       {
         t: "The agent builder &amp; NeuroQL",
         lead: "You don't hand-craft agents &mdash; you describe them and the platform builds them, with a visual builder for prompt structure, skills/tools, and task steps. Export as JSON into Claude Code.",
-        body: "<p>Describe the agent and the platform builds it on the fly. The <strong>visual builder</strong> exposes each agent's prompting structure, its skills &amp; tools, and its task / workflow steps; prompt enhancement (role definition, behavior guidelines, error handling) is AI-assisted from templates. You can design an agent in-platform, then export it as <strong>JSON</strong> and drop it into Claude Code for external analysis. [[VIMEO2]]</p><p><strong>NeuroQL</strong> agents expose their prompting structure and phases too &mdash; e.g. a query-router agent with behavioral guidelines and a defined output format. [[VIMEO2]]</p>"
+        body: "<p>Describe the agent and the platform builds it on the fly. The <strong>visual builder</strong> exposes each agent's prompting structure, its skills &amp; tools, and its task / workflow steps; prompt enhancement (role definition, behavior guidelines, error handling) is AI-assisted from templates. You can design an agent in-platform, then export it as <strong>JSON</strong> and drop it into Claude Code for external analysis. [[VIMEO2]]</p><p><strong>NeuroQL</strong> agents expose their prompting structure and phases too &mdash; e.g. a query-router agent with behavioral guidelines and a defined output format. [[VIMEO2]]</p><p class='note'>The builder is the GUI face of Anthropic's <strong>augmented-LLM building block</strong> (an LLM + tools + memory + retrieval) composed into workflows. Anthropic flags the trade-off directly: visual builders speed you up but can &ldquo;obscure the underlying prompts and responses&rdquo; &mdash; which is exactly why an FDE keeps the option to export the agent and run it raw in Claude Code. [[ANTH_AGENTS]]</p>"
+      },
+      {
+        t: "What does &ldquo;done&rdquo; look like?",
+        lead: "An open question from the session (Ronald asked; it was deferred). Here's the credible answer for legacy modernization &mdash; and it isn't naive feature parity.",
+        body: "<p>In the session this stayed loose: &ldquo;done&rdquo; is anchored to the <strong>BA review gates</strong> (specs validated, then epics/stories validated) and <strong>client acceptance of the POC's expected output.</strong> [[VIMEO2]] The industry frames it more sharply:</p><ul><li><strong>Not</strong> &ldquo;rebuild every feature&rdquo; &mdash; that's the feature-parity trap (effort underestimated, ~50% of legacy features unused). Done = the <em>validated target-state spec's</em> acceptance criteria are met for the in-scope capabilities. [[FOWLER_FP]]</li><li><strong>Behaviour preserved where it matters:</strong> for the slices you change, capture the legacy system's real outputs and lock them in as <strong>characterization / golden-master tests</strong> (Michael Feathers) &mdash; &ldquo;if a legacy system has no tests and you start refactoring, you're not modernizing, you're gambling.&rdquo; [[FEATHERS]]</li><li><strong>Definition of Done as a shared gate:</strong> a written, agreed checklist every increment must satisfy before it's shippable &mdash; the FDE's own &ldquo;am I crossing off the finalized deliverables?&rdquo; check, made explicit. [[VIMEO]]</li></ul>",
+        views: [
+          { r: "Business Analyst", t: "Done = your acceptance criteria on the validated spec/stories are demonstrably met &mdash; the POC produces the expected business output you signed off. [[VIMEO2]][[FOWLER_FP]]" },
+          { r: "Engineer / FDE", t: "Done = in-scope behaviour reproduced and protected by characterization tests + the story's definition-of-done checklist green, not 1:1 parity with dead legacy features. [[FEATHERS]]" },
+          { r: "The trap to avoid", t: "&lsquo;Do what the old system does&rsquo; sounds safe but blows up scope &mdash; defining the full 'as-is' is often the biggest cost of all. Scope to value. [[FOWLER_FP]]" }
+        ]
       }
     ]
   },
